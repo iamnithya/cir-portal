@@ -84,17 +84,18 @@ def handle_student_upload(request):
             filehandle = request.FILES['file']
             studentFields = filehandle.get_array()[1:]
             counter = 0
-            for student in studentFields:
-                Student.Objects.create_student_fromfile(student[0].lower(),student[1],student[2],student[3],student[4], student[5],
-                                                        student[6],student[7],student[8],student[9],student[10],student[11],student[12],student[13],student[14])
-                counter = counter+1
+
+        for student in studentFields:
+            Student.Objects.create_student_fromfile(student[0].lower(),student[1],student[2],student[3],student[4], student[5],
+                                                    student[6],student[7],student[8],student[9],student[10],student[11],student[12],student[13],student[14])
+            counter = counter+1
 
             return render_to_response('register/cirstaff/register_bulk_student_list.html',{'counter':counter },
-                                       context_instance=RequestContext(request))
+                                      context_instance=RequestContext(request))
         else :
-             return redirect(request.META['HTTP_REFERER'])
+            return redirect(request.META['HTTP_REFERER'])
     else:
-         return HttpResponseBadRequest()
+        return HttpResponseBadRequest()
 
 
 class StudentListView(LoginRequiredMixin,ListView):
@@ -117,3 +118,16 @@ class StudentListUpdateView(UpdateView):
             return obj
         else:
             raise Http404("That doesnt exist.")
+
+
+class StudentFilterExternalView(ListView):
+    template_name = "register/cirstaff/filter_external_list.html"
+
+    def get_queryset(self):
+        cgpa = self.request.GET.get('cgpa')
+        arrears =self.request.GET.get('arrear')
+        branch = self.request.GET.get('branch')
+        tenth = self.request.GET.get('tenth')
+        twelth = self.request.GET.get('twelth')
+        return Student.Objects.filter(cgpa__gte =cgpa, curr_arrears=arrears, branch=branch,
+                                      tenth_mark__gte =tenth, twelth_mark__gte =twelth )
